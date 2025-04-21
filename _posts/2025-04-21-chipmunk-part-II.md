@@ -19,7 +19,7 @@ Part II shifts focus to building deeper theoretical intuition behind why dynamic
 
 Let's dive deeper and unpack the theoretical foundations of Chipmunk’s dynamic sparsity!
 
-<video autoplay style="width: 100%">
+<video controls autoplay style="width: 100%">
   <source src="https://sandyresearch.github.io/images/chipmunk/serial-video.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
