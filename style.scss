@@ -8,7 +8,6 @@
 @import "reset";
 @import "variables";
 // Syntax highlighting @import is at the bottom of this file
-// @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
 
 /**************/
 /* BASE RULES */
@@ -133,7 +132,7 @@ img {
 }
 
 code {
-  font-family: 'Geist Mono', monospace;
+  font-family: $mono;
   background-color: #f0f0f0;
   border-radius: 0.1rem;
   color: #e15758;
@@ -141,15 +140,17 @@ code {
 }
 
 table {
+  width: 100%;
   padding: 0.5rem;
   border-radius: 0.1rem;
   border: 1px solid #777;
-  font-weight: bold;
 }
 
 table th {
   padding: 0.5rem;
+  font-weight: bold;
   border-radius: 0.1rem;
+  text-align: center;
   border: 1px solid #777;
 }
 
@@ -157,6 +158,14 @@ table td {
   padding: 0.5rem;
   border-radius: 0.1rem;
   border: 1px solid #777;
+}
+
+table tr:nth-child(even) td {
+  background-color: #f0f0f0;
+}
+
+table tr:nth-child(odd) td {
+  background-color: #fff;
 }
 
 

@@ -28,11 +28,10 @@ In this post, we unpack:
 
 | Hunyuan | VBench Quality | VB Semantic | VB Total | Resolution | Sparsity | Latency | Speedup |
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
-| FlashAttention-3 | 85.09% | 75.82% | 83.24% | 720x1280x129 | 0% | 1030s | 1x |
-| Sliding Tile Attention (Training-Free) | 84.63% | 73.83% | 82.46% | 768x1280x117 | 58% | 945s \-\> 527s | 1.79x |
-| Chipmunk (Training-Free) | 84.60% | 76.29% | 82.94% | 720x1280x129 | 82% \* | 1030s \-\> 477s | 2.16x |
-| Chipmunk \+ Step Caching (Training-Free) | 84.22% | 75.60% | 82.50% | 720x1280x129 | 87% | 1030s \-\> 277s | 3.72x |
-
+| FlashAttention-3 | 85.09% | 75.82% | 83.24% | 720 x 1280 x 129 | 0% | 1030s | 1x |
+| Sliding Tile Attention (Training-Free) | 84.63% | 73.83% | 82.46% | 768 x 1280 x 117 | 58% | 945s \-\> 527s | 1.79x |
+| Chipmunk (Training-Free) | 84.60% | 76.29% | 82.94% | 720 x 1280 x 129 | 82% \* | 1030s \-\> 477s | 2.16x |
+| Chipmunk \+ Step Caching (Training-Free) | 84.22% | 75.60% | 82.50% | 720 x 1280 x 129 | 87% | 1030s \-\> 277s | 3.72x |
  \* 93% sparsity on 44 out of 50 steps for an average of 82% sparsity.
 
 | FLUX.1-dev\* (bf16) | ImageReward | MLP Sparsity | Attn Sparsity | Speedup |
