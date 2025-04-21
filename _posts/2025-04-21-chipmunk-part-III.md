@@ -147,10 +147,10 @@ Each layer has (i) a boolean mask to mark the active \[192, 1\] columns of the i
 1. Bitpack the sparsity mask (since torch.bool is 1 byte per value by default)  
 2. Offload the masks and activation cache to CPU memory with overlapped compute/communication
 
-|  | Naive | Optimized | Memory Reduction |  |
-| :---- | :---- | :---- | :---- | :---- |
-| Sparsity Mask Cache | 104 GB | 430 MB | 242x |  |
-| Activation Cache | 43 GB | 1.4 GB | 31x |  |
+|  | Naive | Optimized | Memory Reduction |
+| :---- | :---- | :---- | :---- |
+| Sparsity Mask Cache | 104 GB | 430 MB | 242x |
+| Activation Cache | 43 GB | 1.4 GB | 31x |
 
 We find that a simple torch compiled bitpack function gives us a quick 8x memory reduction on the sparsity mask with very small overhead.
 
