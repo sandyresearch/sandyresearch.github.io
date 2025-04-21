@@ -15,7 +15,7 @@ This is the first part of a three-part series. Part I will cover an overview of 
 </video>
 
 ![][comparison]
-<center>Images of cute chipmunks can be generated 1.37x faster\! <b>Left</b>: Fully Dense FLUX.1-dev. <b>Right</b>: Ours (84% sparse attention and 70% sparse MLP)</center>
+<center>Images of cute chipmunks can be generated 1.37x faster! <b>Left</b>: Fully Dense FLUX.1-dev. <b>Right</b>: Ours (84% sparse attention and 70% sparse MLP)</center>
 
 **Motivation:** Diffusion Transformers (DiTs) have become the standard for video generation, but the time and cost of generation keeps them out of reach of many applications. We raise two questions: (1) What do the model activations want to do? (2) What does the hardware want to do? We then use these insights to design hardware-friendly algorithms that maximize quality per unit of generation time.
 
@@ -23,7 +23,7 @@ In this post, we unpack:
 
 1. **Slow-Changing, Sparse Activations:** DiT activations for MLP and attention change slowly across steps, and they are naturally sparse.  
 2. **Cross-Step Deltas:** Because of the slow changing activations and natural sparsity, reformulating them to compute cross-step deltas make them even sparser.  
-3. **Hardware-Aware Sparsity Pattern:** For both attention and MLP, we can pack dense shared memory tiles from non-contiguous columns in global memory. We open-source fast kernels for this\!
+3. **Hardware-Aware Sparsity Pattern:** For both attention and MLP, we can pack dense shared memory tiles from non-contiguous columns in global memory. We open-source fast kernels for this!
 
 
 | Hunyuan | VBench Quality | VB Semantic | VB Total | Resolution | Sparsity | Latency | Speedup |
@@ -41,7 +41,7 @@ In this post, we unpack:
 | Chipmunk | 80.2%	 | 70% | 83.5% | **1.37x** |
 | Chipmunk \+ Step Caching | 78.0% | 70% | 83.5% | **1.63x** |
 
-These FLUX.1-dev numbers were evaluated on 1280x768 images, and we’ve found that if we increase image size to 2304x1280, we can get speedups of up to 1.65x per-image without stacking on top of step caching methods, and 1.9x with step caching\! We’ve also found that we can sparsify FP8 Flux to get a 1.1x end-to-end speedup over the fastest open-source implementation.
+These FLUX.1-dev numbers were evaluated on 1280x768 images, and we’ve found that if we increase image size to 2304x1280, we can get speedups of up to 1.65x per-image without stacking on top of step caching methods, and 1.9x with step caching! We’ve also found that we can sparsify FP8 Flux to get a 1.1x end-to-end speedup over the fastest open-source implementation.
 
 ## Slow-Changing, Sparse Activations
 
@@ -97,15 +97,15 @@ Our kernel optimizations achieve efficient dynamic sparsity and caching through:
 2. **Fast cache writeback**—we use the CUDA driver API to overlap the cache writeback with subsequent GEMM computations by allocating leftover streaming multiprocessors (SMs) to custom TMA-based reduction kernels (with PTX instructions like `cp.reduce.async.bulk`) during the tail effects of wave quantization, achieving a 2x speedup over naive implementations and saving \~20 microseconds per MLP invocation.  
 3. **Warp-Specialized Persistent Kernel:** We let the producer warpgroup’s memory loads to overlap with consumer epilogues (which are expensive because of all the caching computation), and store swizzle offsets in registers, minimizing address computation overhead when using granular `cp.async` loads instead of TMA.
 
-## Come and play with Chipmunks\!
+## Come and play with Chipmunks!
 
-The only thing we love more than chipmunks is the open-source community\! Check out our repo at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk) and make your image and video models go brrrr. 
+The only thing we love more than chipmunks is the open-source community! Check out our repo at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk) and make your image and video models go brrrr. 
 
 <div style="text-align: center; width: 50%; margin: 0 auto;">
 <img src="https://sandyresearch.github.io/images/chipmunk/kittens.png" />
 </div>
 <center>
-*We're big fans of ThunderKittens, and so are our chipmunks\! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.*
+*We're big fans of ThunderKittens, and so are our chipmunks! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.*
 </center>
 
 
