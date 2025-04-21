@@ -3,14 +3,16 @@ layout: post
 title: "Chipmunk: Training-Free Acceleration of Diffusion Transformers with Dynamic Column-Sparse Deltas (Part I)"
 ---
 
-**Authors**: Austin Silveria, Soham Govande, Dan Fu* \| **Repo**: [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk)
+**Authors**: Austin Silveria, Soham Govande, Dan Fu \| Star us on GitHub: [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk)
 
 **TL;DR:** We present Chipmunk, a training-free method to accelerate diffusion transformers with hardware-aware dynamic sparsity.  Chipmunk caches attention weights and MLP activations from previous steps and dynamically computes a sparse “*delta*” against the cached weights. Chipmunk achieves up to 3.7x faster video generation on HunyuanVideo at 720x1280 resolution for a 5s video, and 1.6x faster image generations on FLUX.1-dev at 1280x768 resolution.
 
-This is the first part of a three-part series:
-1. Part I: Overview of Chipmunk Algorithm
-2. Part II: Building Theoretical Intuition for Column Sparse Deltas
-2. Part III: GPU Kernels & Systems Optimization Deep-Dive
+This is the first part of a three-part series. Part I will cover an overview of Chipmunk's algorithms. Part II will build theoretical intuition for column-sparse deltas. Part III will be a deep dive on  GPU kernels & systems optimizations.
+
+<video controls autoplay style="width: 100%">
+  <source src="https://sandyresearch.github.io/images/chipmunk/grid-video.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ![][comparison]
 <center>Images of cute chipmunks can be generated 1.37x faster\! <b>Left</b>: Fully Dense FLUX.1-dev. <b>Right</b>: Ours (84% sparse attention and 70% sparse MLP)</center>
@@ -23,12 +25,6 @@ In this post, we unpack:
 2. **Cross-Step Deltas:** Because of the slow changing activations and natural sparsity, reformulating them to compute cross-step deltas make them even sparser.  
 3. **Hardware-Aware Sparsity Pattern:** For both attention and MLP, we can pack dense shared memory tiles from non-contiguous columns in global memory. We open-source fast kernels for this\!
 
-<video controls autoplay>
-  <source src="https://sandyresearch.github.io/images/chipmunk/grid-video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-![]
 
 | Hunyuan | VBench Quality | VB Semantic | VB Total | Resolution | Sparsity | Latency | Speedup |
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
@@ -78,7 +74,7 @@ Given an attention/MLP output cache, an equivalent definition of a normal dense 
 The sparsity pattern we’ve been describing thus far, recomputing individual scaled output vectors for each token, corresponds to \[1, 1\] unstructured sparsity on the intermediate activations. GPUs do not like this. What they do like is computing large blocks at once, in the size ballpark of \[128, 256\] (in the current generation). This corresponds to 128 contiguous tokens and 256 contiguous keys/values.
 
 <div style="text-align: center; width: 60%; margin: 0 auto;">
-![][tiles]
+<img src="https://sandyresearch.github.io/images/chipmunk/tiles.png">
 </div>
 
 Computing with block sparsity that aligns with the native tile sizes of the kernel is essentially free because the GPU is using the same large matrix multiplication sizes and skips full blocks of work.
@@ -106,7 +102,7 @@ Our kernel optimizations achieve efficient dynamic sparsity and caching through:
 The only thing we love more than chipmunks is the open-source community\! Check out our repo at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk) and make your image and video models go brrrr. 
 
 <div style="text-align: center; width: 50%; margin: 0 auto;">
-![][kittens]  
+<img src="https://sandyresearch.github.io/images/chipmunk/kittens.png" />
 </div>
 <center>
 *We're big fans of ThunderKittens, and so are our chipmunks\! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.*
