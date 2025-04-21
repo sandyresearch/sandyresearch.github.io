@@ -51,7 +51,7 @@ On H100s, there are two key hardware abstractions that contribute the most to te
 
 To see why we need TMA and WGMMAs, let’s walk through [FlashAttention-3](https://research.colfax-intl.com/flashattention-3-fast-and-accurate-attention-with-asynchrony-and-low-precision/) (FA3) at a high level. FA3 partitions work across the H100’s 132 Streaming Multiprocessors (SMs) as chunks of rows in the intermediate \[n, n\] attention matrix. Each SM loads a chunk of queries from global to shared memory and slides right across this intermediate matrix as it incrementally loads chunks of key and values to compute the attention output. With more query chunks than SMs, each SM has an outer loop over chunks.  
 
-<center><img src="https://sandyresearch.github.io/images/chipmunk/tile.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/tiles.png" width="60%" /></center>
 
 We use TMA for global to shared loads/stores, and WGMMAs for big matrix multiplications:
 
@@ -94,7 +94,7 @@ Both operations compute a query/key/value operation with a non-linearity applied
 
 And as we’ve seen, GPUs like to compute large blocks of the intermediate matrix at once (the query-key scores).
 
-<center><img src="https://sandyresearch.github.io/images/chipmunk/tile.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/tiles.png" width="60%" /></center>
 
 So if we compute with block sparsity that aligns with the native tile sizes of the kernel, it is essentially free because the tensor cores get to use the same large matrix multiplication sizes and skip full blocks of work. But finer granularity presents a problem because we’d have sparsity patterns that don’t align with the large tensor core block sizes, leading to low utilization.
 
@@ -171,7 +171,7 @@ Overall, we think there’s a lot of unexplored territory around granular dynami
 And we’re open sourcing everything! Check out our repo at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk) and come hack on kernels with chipmunks!
 
 [chipmunk-gpu]: https://sandyresearch.github.io/images/chipmunk/chipmunk-gpu.png
-[tile]: https://sandyresearch.github.io/images/chipmunk/tile.png 
+[tile]: https://sandyresearch.github.io/images/chipmunk/tiles.png 
 [sram]: https://sandyresearch.github.io/images/chipmunk/sram.png 
 [wave]: https://sandyresearch.github.io/images/chipmunk/wave.png
 [kittens]: https://sandyresearch.github.io/images/chipmunk/kittens-2.png
