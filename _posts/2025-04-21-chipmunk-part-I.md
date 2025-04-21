@@ -23,7 +23,10 @@ In this post, we unpack:
 2. **Cross-Step Deltas:** Because of the slow changing activations and natural sparsity, reformulating them to compute cross-step deltas make them even sparser.  
 3. **Hardware-Aware Sparsity Pattern:** For both attention and MLP, we can pack dense shared memory tiles from non-contiguous columns in global memory. We open-source fast kernels for this\!
 
-![][https://sandyresearch.github.io/images/chipmunk/grid-video.mp4]
+<video controls autoplay>
+  <source src="https://sandyresearch.github.io/images/chipmunk/grid-video.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ![]
 
@@ -74,7 +77,9 @@ Given an attention/MLP output cache, an equivalent definition of a normal dense 
 
 The sparsity pattern we’ve been describing thus far, recomputing individual scaled output vectors for each token, corresponds to \[1, 1\] unstructured sparsity on the intermediate activations. GPUs do not like this. What they do like is computing large blocks at once, in the size ballpark of \[128, 256\] (in the current generation). This corresponds to 128 contiguous tokens and 256 contiguous keys/values.
 
+<div style="text-align: center; width: 60%; margin: 0 auto;">
 ![][tiles]
+</div>
 
 Computing with block sparsity that aligns with the native tile sizes of the kernel is essentially free because the GPU is using the same large matrix multiplication sizes and skips full blocks of work.
 
@@ -100,8 +105,12 @@ Our kernel optimizations achieve efficient dynamic sparsity and caching through:
 
 The only thing we love more than chipmunks is the open-source community\! Check out our repo at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk) and make your image and video models go brrrr. 
 
+<div style="text-align: center; width: 50%; margin: 0 auto;">
 ![][kittens]  
-*We’re big fans of ThunderKittens, and so are our chipmunks\! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.*
+</div>
+<center>
+*We're big fans of ThunderKittens, and so are our chipmunks\! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.*
+</center>
 
 
 [comparison]: https://sandyresearch.github.io/images/chipmunk/comparison.png
