@@ -31,7 +31,7 @@ In the rest of this post, we’ll unpack each of these in detail:
 4. **Fast Cache Writeback**: The asynchrony of the cache writeback enables us to precisely allocate SMs to this I/O-bound operation.  
 5. **Low Memory Overhead**: Activation cache memory can be pipelined from the CPU to minimize our GPU memory footprint.
 
-### GPUs \= Tensor Cores \+ Pit Crew
+## GPUs \= Tensor Cores \+ Pit Crew
 
 Modern GPUs are extremely optimized for large, block matrix multiplications. Tensor cores (the matrix multiplication unit on Nvidia GPUs) account for essentially all of the FLOPs, and everything not running on tensor cores runs about an order of magnitude (or more) slower.
 
@@ -81,7 +81,7 @@ But fine-grained sparsity goes against this. The purpose of granular sparsity is
 
 So to write efficient sparse kernels, we must answer the following question: How can we compute granular sparsity patterns with dense, block matrix multiplications?
 
-### Tile Packing: Efficient Column Sparse Attention and MLPs
+## Tile Packing: Efficient Column Sparse Attention and MLPs
 
 To move toward expressing sparse attention and MLPs with dense, block matrix multiplications, let’s unpack what attention and MLPs are actually computing.
 
@@ -114,7 +114,7 @@ This brings challenges for the epilogue of the first matrix multiplication: We a
 
 But we can fix this with a [persistent grid \+ warp-specialized kernel](https://github.com/sandyresearch/chipmunk/blob/master/csrc/mlp/csp_mlp_mm1.cu#L201)! The producer warpgroup’s prologue can overlap with the consumer warpgroups’ epilogue if multiple work tiles are mapped to a persistent threadblock. This means that while the consumer is cranking away at low-utilization operations, the producer can queue up the next memory load instructions. Persistent grids aren’t new—but  they made an especially big impact on an epilogue-heavy kernel like this.
 
-### Fast Identification of Dynamic Sparsity Patterns
+## Fast Identification of Dynamic Sparsity Patterns
 
 So, we’ve found that \[192, 1\] sparsity on the intermediate activation matrix can be efficient, but we still have the issue of dynamically identifying the most important columns with minimal overhead.
 
@@ -128,15 +128,15 @@ We find that a simple trick solves this problem: Reuse the softmax constants fro
 
 But, we noticed that at smaller sequence lengths, torch.topk was introducing significant overhead relative to the total time of our MLP GEMMs. We can do better! We wrote a [fast approximate top-k kernel](https://github.com/sandyresearch/chipmunk/blob/master/csrc/indexed_io/topk_indices.cu) that uses CUDA shared memory atomics and quantile estimation to beat PyTorch by 2x (and when we compute these indices, our [custom cache writeback kernel](https://github.com/sandyresearch/chipmunk/blob/flux/csrc/indexed_io/copy_indices.cu) (1.5x faster than PyTorch), can process them).
 
-### Fast Cache Writeback
+## Fast Cache Writeback
 
 The longest stage of the first MLP GEMM epilogue was scattering the results into unpacked activation cache global memory. What if we could fuse this memory-bound scatter-add operation into the next compute-bound GEMM? We were eager to find out! 
 
-<center><img src="https://sandyresearch.github.io/images/chipmunk/wave.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/wave-quant.png" width="60%" /></center>
 
 We wrote [some code using CUDA driver API](https://github.com/sandyresearch/chipmunk/blob/master/csrc/mlp/csp_mlp_mm2_and_scatter_add.cu) to allocate a handful of streaming multiprocessors (SMs) to a custom kernel implementing the cache writeback operation, while using the rest of the SMs for the GEMM. Since nearly every GEMM suffers from some degree of wave quantization, this does not impact the runtime of the GEMM—it just repurposes any leftover compute. [Our custom cache writeback kernel](https://github.com/sandyresearch/chipmunk/blob/master/csrc/indexed_io/scatter_add.cu) uses the latest TMA-based reduction PTX instructions (`cp.reduce.async.bulk`) to perform large atomic updates into global tensors (3x faster than naive in-register reductions), and this lets us save \~20 microseconds on every MLP invocation!
 
-### Minimize Memory Overhead
+## Minimize Memory Overhead
 
 What about managing cache memory? Since we’re computing sparse deltas against cached per-layer activations and reusing per-layer sparse indices across steps, how much memory does this consume?
 
@@ -156,7 +156,7 @@ We find that a simple torch compiled bitpack function gives us a quick 8x memory
 
 And for offloading, PCIE-5’s 64 GB/s is not slow! We preallocate pinned tensors (page locked) in CPU memory and double buffer in GPU memory so we can [load the next layer’s mask and activation cache during the computation of the current layer](https://github.com/sandyresearch/chipmunk/blob/master/src/chipmunk/util/storage/offloaded_tensor.py).
 
-### Where does this leave us?
+## Where does this leave us?
 
 <center><img src="https://sandyresearch.github.io/images/chipmunk/kittens-2.png" width="60%" /></center>
 

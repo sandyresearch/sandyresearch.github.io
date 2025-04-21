@@ -23,7 +23,7 @@ Let's dive deeper and unpack the theoretical foundations of Chipmunk’s dynamic
 <iframe width="100%" height="auto" src="https://www.youtube.com/embed/cIOi-4vCxhs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </center>
 
-### DiTs: Paths Through Latent Space
+## DiTs: Paths Through Latent Space
 
 Few-step models, step distillation, and training-free caching have all significantly accelerated diffusion inference. Where do these lines of research converge? We’re interested in conceptually unifying these approaches and understanding the role of sparsity and caching at a more granular level—within individual attention and MLP operations. This post will focus on two things: developing a conceptual framework for thinking about diffusion efficiency and designing hardware-efficient sparse caching algorithms for attention and MLP. 
 
@@ -49,7 +49,7 @@ So how can we move towards generation with the efficiency of a single step *and*
 
 **Caching \+ sparsity** is one possible path. We’ll see that per-step DiT outputs, or movements in latent space, change slowly across steps, allowing us to reuse movements from earlier steps. And by understanding the most atomic units of DiT latent space movement, we’ll see that most of this cross-step change can be captured with very sparse approximations.
 
-### Latent Space Path Decompositions
+## Latent Space Path Decompositions
 
 So, now we’ve conceptualized DiTs as computing “paths” in latent space, where per-token latent vectors accumulate “movements” in latent space on each step.
 
@@ -57,13 +57,13 @@ But what makes up these per-step latent space movements produced by the DiT?
 
 To get to the root, we’ll make two conceptual moves about what happens in a DiT forward pass:
 
-1. **Attention and MLP are both query, key, value operations.**  
-2. **Transformer activations accumulate sums of weighted values from attention and MLP across layers and steps (the “[residual stream](https://transformer-circuits.pub/2021/framework/index.html)” interpretation).**
+1. **Attention and MLP are both query, key, value operations.  
+2. Transformer activations accumulate sums of weighted values from attention and MLP across layers and steps (the “[residual stream](https://transformer-circuits.pub/2021/framework/index.html)” interpretation).
 
 Let’s start with the attention and MLP equations:
 
-1. **Attention:**  softmax(Q @ KT)  @ V  
-2. **MLP:**                 gelu(X  @ W1) @ W2
+1. Attention:  softmax(Q @ KT)  @ V  
+2. MLP:                 gelu(X  @ W1) @ W2
 
 Both operations use a non-linearity to compute the scalar coefficients for a linear combination of value vectors. In attention, the value vectors are dynamic (V is projected from the current token representation). In MLP, the value vectors are static (rows of the weights W2). Thus, in attention, our outputs are a sum of scaled rows in the V matrix, and in MLP, our outputs are a sum of scaled rows in the W2 matrix (the bias is one extra static vector). We can visualize these individual vectors as being summed to produce the total operation output.
 
@@ -90,7 +90,7 @@ Thus, these individual scaled vectors are the only pieces of information ever �
 2. Reformulate sparse attention/MLP to selectively recompute fast-changing vectors across steps  
 3. Map this reformulation to a hardware-efficient implementation
 
-### Latent Space Momentum: *Some* DiT Activations Change Slowly Across Steps
+## Latent Space Momentum: *Some* DiT Activations Change Slowly Across Steps
 
 Ok, let’s briefly take stock. We’ve cast DiTs as computing paths in latent space from noise to output over the course of multiple steps, where each step adds a movement (output residual) that affects the movements computed by later steps. We’ve also seen that we can decompose these paths into more atomic units of movement: the scaled vectors output by attention and MLP.
 
@@ -114,27 +114,29 @@ The takeaway here is that we can see step distillation and dynamic activation ca
 
 The intersection will replace those heuristics with gradient descent. And for the best quality-per-FLOP tradeoff, we want to dynamically allocate those steps across all movements with the finest granularity. In the next section, we’ll look at this granular allocation: Identifying the redundancy in cross-step movements at the individual vector level, and reformulating sparse attention and MLP to exploit it.
 
-### Latent Subspace Momentum: Sparse Attention/MLP Deltas
+## Latent Subspace Momentum: Sparse Attention/MLP Deltas
 
 We’ve seen that DiT activation caching dynamically allocates fewer steps to slow-changing activation vectors (summed movements in latent space) at varying hierarchical levels (e.g., per-step, per-layer, per-token). Our goal now is to take the granularity of that dynamic allocation to the limit: How can we dynamically allocate fewer steps to specific atomic movements output by attention and MLP? What does this look like in concrete computation?
 
 We’ll make four moves:
 
-1. **Attention and MLP *step-deltas* subtract the old scaled output vectors and add the new scaled output vectors.**  
-2. **Sparse intermediate activations compute a subset of the individual output vectors.**  
-3. **Attention and MLP are known to be naturally sparse.**  
-4. **Attention and MLP step-deltas are even sparser.**
+1. Attention and MLP *step-deltas* subtract the old scaled output vectors and add the new scaled output vectors.  
+2. Sparse intermediate activations compute a subset of the individual output vectors.  
+3. Attention and MLP are known to be naturally sparse.  
+4. Attention and MLP step-deltas are even sparser.
 
 To ground ourselves, let’s start with a visualization and concrete computational definition of attention and MLP step deltas. As we saw earlier, attention and MLP both output a sum of scaled vectors, or movements in latent space. Thus, given an attention/MLP output cache, an equivalent definition of a normal dense forward pass on step n is the following: Subtract all of step n-1’s output vectors from the cache, and add all of step n’s new vectors.
 
-![][image7]
+<center>
+<img src="https://sandyresearch.github.io/images/chipmunk/replace.png" width="60%" />
+</center>
 
 So, replacing all movements in latent space on every step is equivalent to running each step with the normal dense DiT forward pass. But what we would like to do is dynamically replace a subset of these movements on each step. What does this look like in the concrete computation of attention and MLP?
 
 Recall that each value-vector in attention/MLP is scaled by a single scalar value in the intermediate activation matrix. This means that sparsity on the intermediate activation matrix corresponds to removing atomic vector movements from the output. But, if we instead reuse those skipped atomic vector movements from a previous step, we have *replaced* a subset of the atomic vector movements (i.e., we have computed the sparse step-delta).
 
 <center>
-<img src="https://sandyresearch.github.io/images/chipmunk/replace.png" width="60%" />
+<img src="https://sandyresearch.github.io/images/chipmunk/cache.png" />
 </center>
 
 But why should we expect the sparse replacement of atomic vector movements across steps (the sparse delta) to be a good approximation of the total cross-step change in the attention/MLP’s output?
@@ -144,8 +146,9 @@ We can combine the previously mentioned observation of slow-changing activations
 Putting these two observations together, we should expect to be able to capture most of the cross-step change in attention/MLP outputs (step-delta) by replacing the small subset of scaled vectors that change the most. That is, we should be able to capture most of the cross-step *path deviation* by replacing the atomic movements that change the most.
 
 <center>
-<img src="https://sandyresearch.github.io/images/chipmunk/cache.png" width="60%" />
+<img src="https://sandyresearch.github.io/images/chipmunk/cache-2.png" />
 </center>
+
 
 As an analogy to low-rank approximations, we can think of this like a truncated singular value decomposition, where with a heavy-tailed singular value decomposition, we can get a good approximation of the transformation with only a few of the top singular values. In our case, we can get a good approximation of the cross-step output deltas because the distribution of the intermediate activations is very heavy-tailed.
 
@@ -153,7 +156,7 @@ There is also one fun implication of MLP value-vectors being static vs. attentio
 
 Stepping back, the key takeaway from our discussion of sparse deltas is that sparsity on the intermediate activations of attention/MLP can be used to compute a sparse replacement of atomic movements in latent space. Because DiT activations change slowly across steps and attention/MLP are already naturally sparse, we can reuse most of the atomic latent space movements from the previous step and compute a sparse replacement of only the fastest changing movements. But efficiently computing sparse matrix multiplications on GPUs is notoriously difficult, so how can we get this level of granularity while remaining performant?
 
-### Tile Packing: Efficient Column Sparse Attention and MLP
+## Tile Packing: Efficient Column Sparse Attention and MLP
 
 In previous sections, we’ve seen that attention and MLP both output a sum of scaled vectors, and that sparsity on the intermediate activations corresponds to only computing a subset of those scaled vectors. The challenge we face now is efficiently computing this sparsity on GPUs, which only reach peak performance with large, dense block matrix multiplications. We’ll briefly summarize the approach of our column-sparse kernel here–see Part II of this post for the details.
 
@@ -177,7 +180,7 @@ The more granular loads incur a small performance penalty, but we find that the 
 
 Ok, so now we’re working with \[128, 1\] column sparsity, which corresponds to 128 contiguous tokens recomputing the same set of individual output vectors across steps (atomic latent space movements). Intuitively, we expect that small 2D *patches* of an image have similar color and brightness. And in video, we expect the same for small 3D cubes (*voxels*). Yet, the natural token order is *raster order* from left to right, top down, and frame zero onwards. To create 128-size chunks with the most similar tokens, we **reorder** the tokens (and RoPe embeddings) once at the beginning of the diffusion process such that a **chunk** in the flattened sequence corresponds to a **patch/voxel**. These similar tokens, which we expect to interact with similar keys/values, now share the same set of sparse indices because they occupy contiguous rows of the input matrix. At the end of the diffusion process, we then reverse this reordering before decoding to pixel space.
 
-### Where does this leave us?
+## Where does this leave us?
 
 <center>
 <img src="https://sandyresearch.github.io/images/chipmunk/chipmunk-train.png" width="60%" />

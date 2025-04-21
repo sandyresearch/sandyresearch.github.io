@@ -18,7 +18,7 @@ In a few minutes you'll be set up with a minimal, responsive blog like the one b
 
 ## Quick Start
 
-### Step 1) Fork Jekyll Now to your User Repository
+## Step 1) Fork Jekyll Now to your User Repository
 
 Fork this repo, then rename the repository to yourgithubusername.github.io.
 
@@ -26,7 +26,7 @@ Your Jekyll blog will often be viewable immediately at <https://yourgithubuserna
 
 ![Step 1](/images/step1.gif "Step 1")
 
-### Step 2) Customize and view your site
+## Step 2) Customize and view your site
 
 Enter your site name, description, avatar and many other options by editing the _config.yml file. You can easily turn on Google Analytics tracking, Disqus commenting and social icons here too.
 
@@ -40,7 +40,7 @@ Making a change to _config.yml (or any file in your repository) will force GitHu
 
 ![_config.yml](/images/config.png "_config.yml")
 
-### Step 3) Publish your first blog post
+## Step 3) Publish your first blog post
 
 Edit `/_posts/2014-3-3-Hello-World.md` to publish your first blog post. This [Markdown Cheatsheet](http://www.jekyllnow.com/Markdown-Style-Guide/) might come in handy.
 
