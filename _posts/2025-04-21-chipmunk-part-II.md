@@ -184,11 +184,11 @@ Ok, so now we’re working with [128, 1] column sparsity, which corresponds to 1
 
 ## Where does this leave us?
 
+We’re open sourcing all our code! Come play with our chipmunks at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk), and if you like what you see, give us a ⭐️.
+
 <center>
 <img src="https://sandyresearch.github.io/images/chipmunk/chipmunk-train-2.png" width="40%" />
 <p><i>Chipmunks are even happier if they can train!</i></p>
 </center>
 
-In this post, we’ve made progress along one axis of diffusion efficiency: Pushing the limit of granularity in training-free dynamic compute allocation. But this is only one piece of the larger goal: Serve models with the highest ratio of quality per unit of generation time. At Together AI, we’re constantly pushing the state of the art in model acceleration to serve the fastest models at the lowest cost: [FLUX-1.dev](https://www.together.ai/models/flux-1-dev), [DeepSeek R1](https://www.together.ai/models/deepseek-r1), [Llama 4](https://www.together.ai/models/llama-4-maverick). We’re excited to continue our research to extend granular sparsity across more model architectures and integrate with training algorithms for even more acceleration. 
-
-And we’re open sourcing everything! Check out our repo at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk) and come play with chipmunks!
+We're incredibly excited about the future of hardware-aware sparsity — especially methods that train the model to be model sparsity-aware (something similar to QAT). Coming soon!
