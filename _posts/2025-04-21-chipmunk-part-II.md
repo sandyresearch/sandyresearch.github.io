@@ -19,9 +19,11 @@ Part II shifts focus to building deeper theoretical intuition behind why dynamic
 
 Let's dive deeper and unpack the theoretical foundations of Chipmunk’s dynamic sparsity!
 
-<center>
-<iframe width="100%" height="auto" src="https://www.youtube.com/embed/cIOi-4vCxhs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-</center>
+<video controls autoplay style="width: 100%">
+  <source src="https://sandyresearch.github.io/images/chipmunk/serial-video.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 
 ## DiTs: Paths Through Latent Space
 
