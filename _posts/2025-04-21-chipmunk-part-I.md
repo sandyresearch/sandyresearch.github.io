@@ -105,7 +105,7 @@ The only thing we love more than chipmunks is the open-source community! Check o
 <img src="https://sandyresearch.github.io/images/chipmunk/kittens.png" />
 </div>
 <center>
-*We're big fans of ThunderKittens, and so are our chipmunks! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.*
+<i>We're big fans of ThunderKittens, and so are our chipmunks! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.</i>
 </center>
 
 
