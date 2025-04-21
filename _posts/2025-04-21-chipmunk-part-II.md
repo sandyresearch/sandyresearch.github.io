@@ -183,8 +183,8 @@ Ok, so now we’re working with \[128, 1\] column sparsity, which corresponds to
 ## Where does this leave us?
 
 <center>
-<img src="https://sandyresearch.github.io/images/chipmunk/chipmunk-train.png" width="60%" />
-<i>Chipmunks are even happier if they can train!</i>
+<img src="https://sandyresearch.github.io/images/chipmunk/chipmunk-train-2.png" width="40%" />
+<p><i>Chipmunks are even happier if they can train!</i></p>
 </center>
 
 In this post, we’ve made progress along one axis of diffusion efficiency: Pushing the limit of granularity in training-free dynamic compute allocation. But this is only one piece of the larger goal: Serve models with the highest ratio of quality per unit of generation time. At Together AI, we’re constantly pushing the state of the art in model acceleration to serve the fastest models at the lowest cost: [FLUX-1.dev](https://www.together.ai/models/flux-1-dev), [DeepSeek R1](https://www.together.ai/models/deepseek-r1), [Llama 4](https://www.together.ai/models/llama-4-maverick). We’re excited to continue our research to extend granular sparsity across more model architectures and integrate with training algorithms for even more acceleration. 
