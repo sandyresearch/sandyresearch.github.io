@@ -3,7 +3,7 @@ layout: post
 title: "Chipmunk: Training-Free Acceleration of Diffusion Transformers with Dynamic Column-Sparse Deltas (Part I)"
 ---
 
-**Authors**: Austin Silveria, Soham Govande, Dan Fu \| Star us on GitHub: [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk)
+Austin Silveria, Soham Govande, Dan Fu \| [⭐️ on GitHub](https://github.com/sandyresearch/chipmunk)
 
 **TL;DR:** We present Chipmunk, a training-free method to accelerate diffusion transformers with hardware-aware dynamic sparsity.  Chipmunk caches attention weights and MLP activations from previous steps and dynamically computes a sparse “*delta*” against the cached weights. Chipmunk achieves up to 3.7x faster video generation on HunyuanVideo at 720x1280 resolution for a 5s video, and 1.6x faster image generations on FLUX.1-dev at 1280x768 resolution.
 

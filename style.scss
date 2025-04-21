@@ -19,7 +19,7 @@ html {
 
 body {
 	background: $white;
-  font: 18px/1.4 $trebuchet;
+  font: 18px/1.4 $sans;
   color: $darkGray;
 }
 
@@ -31,7 +31,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: $trebuchet;
+  font-family: $serif;
   color: $darkerGray;
   font-weight: bold;
 
@@ -67,6 +67,11 @@ h4 {
 p {
   margin: 15px 0;
   line-height: 1.4;
+}
+
+b {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 a {
