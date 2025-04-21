@@ -43,14 +43,14 @@ In this post, we unpack:
 
 These FLUX.1-dev numbers were evaluated on 1280x768 images, and we’ve found that if we increase image size to 2304x1280, we can get speedups of up to 1.65x per-image without stacking on top of step caching methods, and 1.9x with step caching\! We’ve also found that we can sparsify FP8 Flux to get a 1.1x end-to-end speedup over the fastest open-source implementation.
 
-### Slow-Changing, Sparse Activations
+## Slow-Changing, Sparse Activations
 
 Chipmunk exploits two simple observations about diffusion transformers:
 
 1. **Activations move slowly:** In each step a Diffusion Transformer (DiT) denoises a latent noise vector. This noise vector changes slowly across successive steps in the diffusion process – and so do the [per-layer](https://arxiv.org/abs/2411.02397) [activations](https://arxiv.org/abs/2410.05317).  
 2. **Activations are sparse:** In attention, it is common to see queries place a very large percentage of their attention probability mass on a small subset of keys–this means that the output will mostly be made up of the small subset of associated rows of V. And in MLP, previous works have observed significant sparsity in the intermediate activations of both [ReLU](https://arxiv.org/abs/2210.06313) and [GeLU](https://arxiv.org/abs/2408.14690)\-based layers, meaning that the output will mostly be made up of the top activated rows of W2.
 
-### Activation Deltas Across Diffusion Steps are *Very* Sparse
+## Activation Deltas Across Diffusion Steps are *Very* Sparse
 
 Chipmunk uses these two observations to reduce the compute costs of the diffusion model – we can effectively capture nearly all the cross-step changes in the activations by ***only*** **recomputing a small subset of attention and MLP..** 
 
@@ -69,7 +69,7 @@ Chipmunk’s key insight is that the value vectors (the colored columns of **v**
 
 Given an attention/MLP output cache, an equivalent definition of a normal dense forward pass on step n is the following: Subtract all of step n-1’s output vectors from the cache, and add all of step n’s new vectors. Therefore, given the natural sparsity in intermediate matrices, we can reformulate attention and MLP to compute a *delta* based on the previous step’s outputs. That is, we *replace* a subset of the output vectors and reuse the rest from the previous step. The output vectors that we replace correspond to sparsifying keys/values at the granularity of a single token in the intermediate matrix.
 
-### Hardware-Efficient Sparsity Pattern
+## Hardware-Efficient Sparsity Pattern
 
 The sparsity pattern we’ve been describing thus far, recomputing individual scaled output vectors for each token, corresponds to \[1, 1\] unstructured sparsity on the intermediate activations. GPUs do not like this. What they do like is computing large blocks at once, in the size ballpark of \[128, 256\] (in the current generation). This corresponds to 128 contiguous tokens and 256 contiguous keys/values.
 
@@ -89,7 +89,7 @@ The more granular loads incur a small performance penalty, but we find that the 
 
 Ok, so now we’re working with \[128, 1\] column sparsity, which corresponds to 128 contiguous tokens recomputing the same set of individual output vectors across steps. Intuitively, we expect that small 2D *patches* of an image have similar color and brightness. And in video, we expect the same for small 3D cubes (*voxels*). Yet, the natural token order is *raster order* from left to right, top down, and frame zero onwards. To create 128-size chunks with the most similar tokens, we **reorder** the tokens (and RoPe embeddings) once at the beginning of the diffusion process such that a **chunk** in the flattened sequence corresponds to a **patch/voxel**. These similar tokens, which we expect to interact with similar keys/values, now share the same set of sparse indices because they occupy contiguous rows of the input matrix. At the end of the diffusion process, we then reverse this reordering before decoding to pixel space.
 
-### Kernel Optimizations
+## Kernel Optimizations
 
 Our kernel optimizations achieve efficient dynamic sparsity and caching through:
 
@@ -97,7 +97,7 @@ Our kernel optimizations achieve efficient dynamic sparsity and caching through:
 2. **Fast cache writeback**—we use the CUDA driver API to overlap the cache writeback with subsequent GEMM computations by allocating leftover streaming multiprocessors (SMs) to custom TMA-based reduction kernels (with PTX instructions like `cp.reduce.async.bulk`) during the tail effects of wave quantization, achieving a 2x speedup over naive implementations and saving \~20 microseconds per MLP invocation.  
 3. **Warp-Specialized Persistent Kernel:** We let the producer warpgroup’s memory loads to overlap with consumer epilogues (which are expensive because of all the caching computation), and store swizzle offsets in registers, minimizing address computation overhead when using granular `cp.async` loads instead of TMA.
 
-### Come and play with Chipmunks\!
+## Come and play with Chipmunks\!
 
 The only thing we love more than chipmunks is the open-source community\! Check out our repo at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk) and make your image and video models go brrrr. 
 
