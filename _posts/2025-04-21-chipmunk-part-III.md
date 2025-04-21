@@ -94,8 +94,6 @@ Both operations compute a query/key/value operation with a non-linearity applied
 
 And as we’ve seen, GPUs like to compute large blocks of the intermediate matrix at once (the query-key scores).
 
-<center><img src="https://sandyresearch.github.io/images/chipmunk/tiles.png" width="60%" /></center>
-
 So if we compute with block sparsity that aligns with the native tile sizes of the kernel, it is essentially free because the tensor cores get to use the same large matrix multiplication sizes and skip full blocks of work. But finer granularity presents a problem because we’d have sparsity patterns that don’t align with the large tensor core block sizes, leading to low utilization.
 
 However, there is one optimization we can make to efficiently get to column sparsity in the intermediate matrix. Looking at our matrix multiplication diagram, let’s think through what happens if we reorder the columns of kT and **vT**. A reordering of kT will apply the same reordering to the columns of A \= q @ kT. And if we apply the same reordering to **vT**, then the end result **o** is actually the same because the columns of A still align with the correct columns of **vT**.

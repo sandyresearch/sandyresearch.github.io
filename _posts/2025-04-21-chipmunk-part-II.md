@@ -165,7 +165,7 @@ In previous sections, we’ve seen that attention and MLP both output a sum of s
 The sparsity pattern we’ve been describing thus far, recomputing individual scaled output vectors (atomic latent space movements) for each token, corresponds to [1, 1] unstructured sparsity on the intermediate activations. GPUs do not like this. What they do like is computing large blocks at once, in the size ballpark of [128, 256] (in the current generation). This corresponds to 128 contiguous tokens and 256 contiguous keys/values.
 
 <center>
-<img src="https://sandyresearch.github.io/images/chipmunk/tiles.png" />
+<img src="https://sandyresearch.github.io/images/chipmunk/tiles.png" width="60%" />
 </center>
 
 Computing with block sparsity that aligns with the native tile sizes of the kernel is essentially free because the GPU is using the same large matrix multiplication sizes and skips full blocks of work.
