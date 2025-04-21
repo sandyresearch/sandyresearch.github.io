@@ -191,4 +191,4 @@ We’re open sourcing all our code! Come play with our chipmunks at [https://git
 <p><i>Chipmunks are even happier if they can train!</i></p>
 </center>
 
-We're incredibly excited about the future of hardware-aware sparsity — especially methods that train the model to be model sparsity-aware (something similar to QAT). Coming soon!
+We're incredibly excited about the future of hardware-aware sparsity. There is much work to be done to train models to become sparsity-aware and optimize/make learnable recomputation schedules at a per-step, per-layer, and per-token granularity.
