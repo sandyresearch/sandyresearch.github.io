@@ -258,7 +258,7 @@ table tr:nth-child(odd) td {
   margin: 0;
   color: $darkGray;
   cursor: pointer;
-  font-family: $trebuchet;
+  font-family: $serif;
   font-weight: 300;
   font-size: 28px;
   letter-spacing: 1px;
@@ -267,6 +267,7 @@ table tr:nth-child(odd) td {
 .site-description {
   margin: -5px 0 0 0;
   color: $gray;
+  font-family: $serif;
   font-size: 16px;
 
   @include mobile {
@@ -277,7 +278,7 @@ table tr:nth-child(odd) td {
 nav {
   float: right;
   margin-top: 23px; // @TODO: Vertically middle align
-  font-family: $trebuchet;
+  font-family: $serif;
   font-size: 18px;
 
   @include mobile {
