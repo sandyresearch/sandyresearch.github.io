@@ -3,17 +3,17 @@ layout: post
 title: "Chipmunk: Training-Free Acceleration of Diffusion Transformers with Dynamic Column-Sparse Deltas (Part I)"
 ---
 
-*Austin Silveria, Soham Govande, Dan Fu*
+*Austin Silveria, Soham Govande, Dan Fu* | [GitHub Repo](https://github.com/sandyresearch/chipmunk)
 
 **TL;DR:** We present Chipmunk, a training-free method to accelerate diffusion transformers with hardware-aware dynamic sparsity.  Chipmunk caches attention weights and MLP activations from previous steps and dynamically computes a sparse “*delta*” against the cached weights. Chipmunk achieves up to 3.7x faster video generation on HunyuanVideo at 720x1280 resolution for a 5s video, and 1.6x faster image generations on FLUX.1-dev at 1280x768 resolution.
 
 This is the first part of a three-part series:
-1. Part I: Summary
+1. Part I: Overview of Chipmunk Algorithm
 2. Part II: Building Theoretical Intuition for Column Sparse Deltas
 2. Part III: GPU Kernels & Systems Optimization Deep-Dive
 
 ![][comparison]
-*Images of cute chipmunks can be generated 1.37x faster\! Left: Fully Dense FLUX.1-dev. Right: Ours (84% sparse attention and 70% sparse MLP)*
+<center>Images of cute chipmunks can be generated 1.37x faster\! <b>Left</b>: Fully Dense FLUX.1-dev. <b>Right</b>: Ours (84% sparse attention and 70% sparse MLP)</center>
 
 **Motivation:** Diffusion Transformers (DiTs) have become the standard for video generation, but the time and cost of generation keeps them out of reach of many applications. We raise two questions: (1) What do the model activations want to do? (2) What does the hardware want to do? We then use these insights to design hardware-friendly algorithms that maximize quality per unit of generation time.
 
@@ -23,9 +23,9 @@ In this post, we unpack:
 2. **Cross-Step Deltas:** Because of the slow changing activations and natural sparsity, reformulating them to compute cross-step deltas make them even sparser.  
 3. **Hardware-Aware Sparsity Pattern:** For both attention and MLP, we can pack dense shared memory tiles from non-contiguous columns in global memory. We open-source fast kernels for this\!
 
-But first, a preview of our results:
+![][https://sandyresearch.github.io/images/chipmunk/grid-video.mp4]
 
-\[embedded [comparison video](https://drive.google.com/file/d/1X-5MPf4t-AQPGAozfQq4OwsAWt1jALQG/view?usp=sharing) without compression degradation\]
+![]
 
 | Hunyuan | VBench Quality | VB Semantic | VB Total | Resolution | Sparsity | Latency | Speedup |
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
@@ -104,9 +104,9 @@ The only thing we love more than chipmunks is the open-source community\! Check 
 *We’re big fans of ThunderKittens, and so are our chipmunks\! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.*
 
 
-[comparison]: images/chipmunk/comparison.png
-[sum]: images/chipmunk/sum.png
-[cache]: images/chipmunk/cache.png
-[tiles]: images/chipmunk/tiles.png
-[sram]: images/chipmunk/sram.png
-[kittens]: images/chipmunk/kittens.png
+[comparison]: https://sandyresearch.github.io/images/chipmunk/comparison.png
+[sum]: https://sandyresearch.github.io/images/chipmunk/sum.png
+[cache]: https://sandyresearch.github.io/images/chipmunk/cache.png
+[tiles]: https://sandyresearch.github.io/images/chipmunk/tiles.png
+[sram]: https://sandyresearch.github.io/images/chipmunk/sram.png
+[kittens]: https://sandyresearch.github.io/images/chipmunk/kittens.png

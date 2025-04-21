@@ -8,6 +8,7 @@
 @import "reset";
 @import "variables";
 // Syntax highlighting @import is at the bottom of this file
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
 
 /**************/
 /* BASE RULES */
@@ -35,7 +36,7 @@ h1, h2, h3, h4, h5, h6 {
   color: $darkerGray;
   font-weight: bold;
 
-  line-height: 1.7;
+  line-height: 1.4;
   margin: 1em 0 15px;
   padding: 0;
 
@@ -66,6 +67,7 @@ h4 {
 
 p {
   margin: 15px 0;
+  line-height: 1.4;
 }
 
 a {
@@ -106,9 +108,57 @@ strong, b {
   font-weight: bold;
 }
 
+ol li {
+  margin-bottom: 0.5rem;
+}
+
+ol li:last-child {
+  margin-bottom: 0;
+}
+
+ul li {
+  margin-bottom: 0.5rem;
+}
+
+ul li:last-child {
+  margin-bottom: 0;
+}
+
+video {
+  width: 100%;
+}
+
 img {
   max-width: 100%;
 }
+
+code {
+  font-family: 'Geist Mono', monospace;
+  background-color: #f0f0f0;
+  border-radius: 0.1rem;
+  color: #e15758;
+  padding: 0.1rem;
+}
+
+table {
+  padding: 0.5rem;
+  border-radius: 0.1rem;
+  border: 1px solid #777;
+  font-weight: bold;
+}
+
+table th {
+  padding: 0.5rem;
+  border-radius: 0.1rem;
+  border: 1px solid #777;
+}
+
+table td {
+  padding: 0.5rem;
+  border-radius: 0.1rem;
+  border: 1px solid #777;
+}
+
 
 // Fixes images in popup boxes from Google Translate
 .gmnoprint img {
