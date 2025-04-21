@@ -36,7 +36,7 @@ This is the ideal of [rectified flow](https://arxiv.org/abs/2209.03003) and [con
 But what makes sequential, multi-step inference expressive is the ability for it to update its trajectory at each step. Later forward passes of the DiT get to compute their outputs (movements in latent space) as a function of the prior steps’ outputs.
 
 <center>
-<img src="https://sandyresearch.github.io/images/multi-step.png" />
+<img src="https://sandyresearch.github.io/images/chipmunk/multi-step.png" />
 </center>
 
 Even with rectified flow and consistency model training, we are [still](https://arxiv.org/abs/2403.03206) [finding](https://arxiv.org/abs/2303.01469) that multiple sequential steps of these models improve quality at the cost of longer generation times. This observation seems quite fundamental, like a reasoning model taking more autoregressive steps to solve a difficult problem.
@@ -44,7 +44,7 @@ Even with rectified flow and consistency model training, we are [still](https://
 So how can we move towards generation with the efficiency of a single step *and* the expressiveness of multiple steps?
 
 <center>
-<img src="https://sandyresearch.github.io/images/cross-step-dev.png" width="75%" />
+<img src="https://sandyresearch.github.io/images/chipmunk/cross-step-dev.png" width="75%" />
 </center>
 
 **Caching \+ sparsity** is one possible path. We’ll see that per-step DiT outputs, or movements in latent space, change slowly across steps, allowing us to reuse movements from earlier steps. And by understanding the most atomic units of DiT latent space movement, we’ll see that most of this cross-step change can be captured with very sparse approximations.
@@ -68,7 +68,7 @@ Let’s start with the attention and MLP equations:
 Both operations use a non-linearity to compute the scalar coefficients for a linear combination of value vectors. In attention, the value vectors are dynamic (V is projected from the current token representation). In MLP, the value vectors are static (rows of the weights W2). Thus, in attention, our outputs are a sum of scaled rows in the V matrix, and in MLP, our outputs are a sum of scaled rows in the W2 matrix (the bias is one extra static vector). We can visualize these individual vectors as being summed to produce the total operation output.
 
 <center>
-<img src="https://sandyresearch.github.io/images/sum.png" />
+<img src="https://sandyresearch.github.io/images/chipmunk/sum.png" />
 </center>
 
 To continue decomposing the per-step latent space movements produced by the DiT, we now want to show that these individual vectors are the only components of those larger movements.
@@ -76,7 +76,7 @@ To continue decomposing the per-step latent space movements produced by the DiT,
 The “[residual stream](https://transformer-circuits.pub/2021/framework/index.html)” interpretation of Transformers conceptualizes the model as having a single activation stream that is “read” from and “written” to by attention and MLP operations. Multi-Head Attention reads the current state of the stream, computes attention independently per head, and writes the sum back to the stream as a residual. MLP reads from the stream and adds its output back as a residual.
 
 <center>
-<img src="https://sandyresearch.github.io/images/flow-1.png" width="75%" />
+<img src="https://sandyresearch.github.io/images/chipmunk/flow-1.png" width="75%" />
 </center>
 
 We now have two observations:
@@ -134,7 +134,7 @@ So, replacing all movements in latent space on every step is equivalent to runni
 Recall that each value-vector in attention/MLP is scaled by a single scalar value in the intermediate activation matrix. This means that sparsity on the intermediate activation matrix corresponds to removing atomic vector movements from the output. But, if we instead reuse those skipped atomic vector movements from a previous step, we have *replaced* a subset of the atomic vector movements (i.e., we have computed the sparse step-delta).
 
 <center>
-<img src="https://sandyresearch.github.io/images/replace.png" width="60%" />
+<img src="https://sandyresearch.github.io/images/chipmunk/replace.png" width="60%" />
 </center>
 
 But why should we expect the sparse replacement of atomic vector movements across steps (the sparse delta) to be a good approximation of the total cross-step change in the attention/MLP’s output?
@@ -144,7 +144,7 @@ We can combine the previously mentioned observation of slow-changing activations
 Putting these two observations together, we should expect to be able to capture most of the cross-step change in attention/MLP outputs (step-delta) by replacing the small subset of scaled vectors that change the most. That is, we should be able to capture most of the cross-step *path deviation* by replacing the atomic movements that change the most.
 
 <center>
-<img src="https://sandyresearch.github.io/images/cache.png" width="60%" />
+<img src="https://sandyresearch.github.io/images/chipmunk/cache.png" width="60%" />
 </center>
 
 As an analogy to low-rank approximations, we can think of this like a truncated singular value decomposition, where with a heavy-tailed singular value decomposition, we can get a good approximation of the transformation with only a few of the top singular values. In our case, we can get a good approximation of the cross-step output deltas because the distribution of the intermediate activations is very heavy-tailed.
@@ -160,7 +160,7 @@ In previous sections, we’ve seen that attention and MLP both output a sum of s
 The sparsity pattern we’ve been describing thus far, recomputing individual scaled output vectors (atomic latent space movements) for each token, corresponds to \[1, 1\] unstructured sparsity on the intermediate activations. GPUs do not like this. What they do like is computing large blocks at once, in the size ballpark of \[128, 256\] (in the current generation). This corresponds to 128 contiguous tokens and 256 contiguous keys/values.
 
 <center>
-<img src="https://sandyresearch.github.io/images/sum-2.png" />
+<img src="https://sandyresearch.github.io/images/chipmunk/sum-2.png" />
 </center>
 
 Computing with block sparsity that aligns with the native tile sizes of the kernel is essentially free because the GPU is using the same large matrix multiplication sizes and skips full blocks of work.
@@ -170,7 +170,7 @@ However, there is one optimization we can make to efficiently get to \[128, 1\] 
 What this allows us to do is compute attention or MLP with any ordering of the keys/values in shared memory–thus we can pack our sparse keys/values from non-contiguous rows in global memory into a [dense tile in shared memory](https://arxiv.org/abs/2301.10936).
 
 <center>
-<img src="https://sandyresearch.github.io/images/sram.png" width="100%" />
+<img src="https://sandyresearch.github.io/images/chipmunk/sram.png" width="100%" />
 </center>
 
 The more granular loads incur a small performance penalty, but we find that the sparsity levels make up for this–e.g. at 93% sparsity, our column-sparse attention kernel in [ThunderKittens](https://github.com/HazyResearch/ThunderKittens) is \~10x times faster than the dense baseline.
@@ -180,7 +180,7 @@ Ok, so now we’re working with \[128, 1\] column sparsity, which corresponds to
 ### Where does this leave us?
 
 <center>
-<img src="https://sandyresearch.github.io/images/chipmunk-train.png" width="60%" />
+<img src="https://sandyresearch.github.io/images/chipmunk/chipmunk-train.png" width="60%" />
 <i>Chipmunks are even happier if they can train!</i>
 </center>
 

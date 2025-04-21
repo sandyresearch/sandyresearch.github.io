@@ -21,7 +21,7 @@ To address these, we:
 2. Leverage the asynchrony of the cache writeback to allocate streaming multiprocessors (SMs) during future GEMM kernel tail effects (i.e., wave quantization)  
 3. Build a CPU to GPU pipeline for cache data, overlapping compute/communication, while minimizing memory usage
 
-<center><img src="https://sandyresearch.github.io/images/chipmunk-gpu.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/chipmunk-gpu.png" width="60%" /></center>
 
 In the rest of this post, we’ll unpack each of these in detail:
 
@@ -51,7 +51,7 @@ On H100s, there are two key hardware abstractions that contribute the most to te
 
 To see why we need TMA and WGMMAs, let’s walk through [FlashAttention-3](https://research.colfax-intl.com/flashattention-3-fast-and-accurate-attention-with-asynchrony-and-low-precision/) (FA3) at a high level. FA3 partitions work across the H100’s 132 Streaming Multiprocessors (SMs) as chunks of rows in the intermediate \[n, n\] attention matrix. Each SM loads a chunk of queries from global to shared memory and slides right across this intermediate matrix as it incrementally loads chunks of key and values to compute the attention output. With more query chunks than SMs, each SM has an outer loop over chunks.  
 
-<center><img src="https://sandyresearch.github.io/images/tile.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/tile.png" width="60%" /></center>
 
 We use TMA for global to shared loads/stores, and WGMMAs for big matrix multiplications:
 
@@ -94,7 +94,7 @@ Both operations compute a query/key/value operation with a non-linearity applied
 
 And as we’ve seen, GPUs like to compute large blocks of the intermediate matrix at once (the query-key scores).
 
-<center><img src="https://sandyresearch.github.io/images/tile.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/tile.png" width="60%" /></center>
 
 So if we compute with block sparsity that aligns with the native tile sizes of the kernel, it is essentially free because the tensor cores get to use the same large matrix multiplication sizes and skip full blocks of work. But finer granularity presents a problem because we’d have sparsity patterns that don’t align with the large tensor core block sizes, leading to low utilization.
 
@@ -102,7 +102,7 @@ However, there is one optimization we can make to efficiently get to column spar
 
 What this allows us to do is compute attention or MLP with any ordering of the keys/values in shared memory–thus for \[192, 1\] sparsity, we can maintain the native compute tile sizes of \[192, 128\] and pack our sparse keys/values from non-contiguous rows in global memory into a [dense tile in shared memory](https://arxiv.org/abs/2301.10936). As a result, our fast kernels can take on any static sparsity pattern (e.g. sliding tile attention) by just passing in a particular set of indices to attend to.
 
-<center><img src="https://sandyresearch.github.io/images/sram.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/sram.png" width="60%" /></center>
 
 But wait, didn’t we say we needed to load large blocks from HBM to SRAM with TMA to avoid bottlenecking the tensor cores?
 
@@ -132,7 +132,7 @@ But, we noticed that at smaller sequence lengths, torch.topk was introducing sig
 
 The longest stage of the first MLP GEMM epilogue was scattering the results into unpacked activation cache global memory. What if we could fuse this memory-bound scatter-add operation into the next compute-bound GEMM? We were eager to find out! 
 
-<center><img src="https://sandyresearch.github.io/images/wave.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/wave.png" width="60%" /></center>
 
 We wrote [some code using CUDA driver API](https://github.com/sandyresearch/chipmunk/blob/master/csrc/mlp/csp_mlp_mm2_and_scatter_add.cu) to allocate a handful of streaming multiprocessors (SMs) to a custom kernel implementing the cache writeback operation, while using the rest of the SMs for the GEMM. Since nearly every GEMM suffers from some degree of wave quantization, this does not impact the runtime of the GEMM—it just repurposes any leftover compute. [Our custom cache writeback kernel](https://github.com/sandyresearch/chipmunk/blob/master/csrc/indexed_io/scatter_add.cu) uses the latest TMA-based reduction PTX instructions (`cp.reduce.async.bulk`) to perform large atomic updates into global tensors (3x faster than naive in-register reductions), and this lets us save \~20 microseconds on every MLP invocation!
 
@@ -158,7 +158,7 @@ And for offloading, PCIE-5’s 64 GB/s is not slow! We preallocate pinned tensor
 
 ### Where does this leave us?
 
-<center><img src="https://sandyresearch.github.io/images/kittens-2.png" width="60%" /></center>
+<center><img src="https://sandyresearch.github.io/images/chipmunk/kittens-2.png" width="60%" /></center>
 
 <center><i>We’re big fans of ThunderKittens, and so are our chipmunks! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.</i></center>
 
@@ -170,8 +170,8 @@ Overall, we think there’s a lot of unexplored territory around granular dynami
 
 And we’re open sourcing everything! Check out our repo at [https://github.com/sandyresearch/chipmunk](https://github.com/sandyresearch/chipmunk) and come hack on kernels with chipmunks!
 
-[chipmunk-gpu]: https://sandyresearch.github.io/images/chipmunk-gpu.png
-[tile]: https://sandyresearch.github.io/images/tile.png 
-[sram]: https://sandyresearch.github.io/images/sram.png 
-[wave]: https://sandyresearch.github.io/images/wave.png
-[kittens]: https://sandyresearch.github.io/images/kittens-2.png
+[chipmunk-gpu]: https://sandyresearch.github.io/images/chipmunk/chipmunk-gpu.png
+[tile]: https://sandyresearch.github.io/images/chipmunk/tile.png 
+[sram]: https://sandyresearch.github.io/images/chipmunk/sram.png 
+[wave]: https://sandyresearch.github.io/images/chipmunk/wave.png
+[kittens]: https://sandyresearch.github.io/images/chipmunk/kittens-2.png
