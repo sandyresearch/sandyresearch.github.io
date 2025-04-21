@@ -5,9 +5,9 @@ title: "Chipmunk: Training-Free Acceleration of Diffusion Transformers with Dyna
 
 *Austin Silveria, Soham Govande, Dan Fu \| [Star on GitHub](https://github.com/sandyresearch/chipmunk)*
 
-**TL;DR:** We present Chipmunk, a training-free method to accelerate diffusion transformers with hardware-aware dynamic sparsity.  Chipmunk caches attention weights and MLP activations from previous steps and dynamically computes a sparse “*delta*” against the cached weights. Chipmunk achieves up to 3.7x faster video generation on HunyuanVideo at 720x1280 resolution for a 5s video, and 1.6x faster image generations on FLUX.1-dev at 1280x768 resolution.
+This is the first part of a three-part series. Part I (this part) will cover an overview of Chipmunk's algorithms. [Part II](https://sandyresearch.github.io/chipmunk-part-II/) will build theoretical intuition for column-sparse deltas. [Part III](https://sandyresearch.github.io/chipmunk-part-III/) will be a deep dive on  GPU kernels & systems optimizations.
 
-This is the first part of a three-part series. Part I will cover an overview of Chipmunk's algorithms. Part II will build theoretical intuition for column-sparse deltas. Part III will be a deep dive on  GPU kernels & systems optimizations.
+**TL;DR:** We present Chipmunk, a training-free method to accelerate diffusion transformers with hardware-aware dynamic sparsity.  Chipmunk caches attention weights and MLP activations from previous steps and dynamically computes a sparse “*delta*” against the cached weights. Chipmunk achieves up to 3.7x faster video generation on HunyuanVideo at 720x1280 resolution for a 5s video, and 1.6x faster image generations on FLUX.1-dev at 1280x768 resolution.
 
 <video controls autoplay style="width: 100%">
   <source src="https://sandyresearch.github.io/images/chipmunk/grid-video.mp4" type="video/mp4">
@@ -107,6 +107,12 @@ The only thing we love more than chipmunks is the open-source community! Check o
 <center>
 <i>We're big fans of ThunderKittens, and so are our chipmunks! Our sparse attention and MLP kernels let our chipmunks play nicely with their kitten friends.</i>
 </center>
+
+## What's next?
+
+If you'd like to continue reading more, checking out Parts II and III of this series! [Part II](https://sandyresearch.github.io/chipmunk-part-II/) will build theoretical intuition for column-sparse deltas and [Part III](https://sandyresearch.github.io/chipmunk-part-III/) will be a deep dive on  GPU kernels & systems optimizations.
+
+If you're interested, reach out! Austin (austinsilveria@gmail.com), Soham (govande@stanford.edu), Dan (danfu@ucsd.edu).
 
 
 [comparison]: https://sandyresearch.github.io/images/chipmunk/comparison.png
