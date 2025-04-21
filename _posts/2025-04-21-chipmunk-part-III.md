@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Chipmunk Part III
+title: "Chipmunk: GPU Kernel Optimizations and Systems (Part III)"
 ---
 
-Coming soon...
+*Austin Silveria, Soham Govande, Dan Fu \| [Star on GitHub](https://github.com/sandyresearch/chipmunk)*
