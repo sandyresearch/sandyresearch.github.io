@@ -231,8 +231,8 @@ table tr:nth-child(odd) td {
 
 .site-avatar {
   float: left;
-  width: 70px;
-  height: 70px;
+  width: 4rem;
+  height: 4rem;
   margin-right: 15px;
 
   @include mobile {
