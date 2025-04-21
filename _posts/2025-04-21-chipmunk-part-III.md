@@ -5,7 +5,7 @@ title: "Chipmunk: Deep Dive on GPU Kernel Optimizations and Systems (Part III)"
 
 *Austin Silveria, Soham Govande, Dan Fu \| [Star on GitHub](https://github.com/sandyresearch/chipmunk)*
 
-In Part I of this post, we took a top down perspective to reason about how the diffusion generation process’s movements in latent space can be well-approximated with sparse deltas in attention and MLP computations. In Part II, we’ll look from these granular sparse deltas down to the hardware–how can we maintain peak GPU performance with this sparsity and caching pattern?
+In Part I and II of this post, we took a top down perspective to reason about how the diffusion generation process’s movements in latent space can be well-approximated with sparse deltas in attention and MLP computations. In Part III, we’ll look from these granular sparse deltas down to the hardware–how can we maintain peak GPU performance with this sparsity and caching pattern?
 
 Fine-grained sparsity in attention and MLP kernels is challenging due to GPUs being optimized heavily for dense block matrix multiplications. Our column-sparse attention and MLP kernels address this with “tile packing.” We opt for granular loads from global memory to [pack a dense shared memory tile](https://arxiv.org/abs/2301.10936) to maximize tensor core utilization–with 93% dynamic \[192, 1\] column sparsity, our sparse [ThunderKittens](https://github.com/HazyResearch/ThunderKittens) attention kernel is 9.3x faster than the dense baseline.
 
@@ -118,7 +118,7 @@ But we can fix this with a [persistent grid \+ warp-specialized kernel](https://
 
 So, we’ve found that \[192, 1\] sparsity on the intermediate activation matrix can be efficient, but we still have the issue of dynamically identifying the most important columns with minimal overhead.
 
-In [training-aware sparsity](https://arxiv.org/abs/2502.11089), there is the option of letting the model learn to directly select the sparsity patterns. For training-free sparsity, however, we need to compute a heuristic from the activations to determine the most important sparse subset of our computation. In Diffusion Transformers (DiTs), we can do this efficiently by exploiting the fact that activations change slowly across steps (see Part I for more detail on DiTs and their activation distributions).
+In [training-aware sparsity](https://arxiv.org/abs/2502.11089), there is the option of letting the model learn to directly select the sparsity patterns. For training-free sparsity, however, we need to compute a heuristic from the activations to determine the most important sparse subset of our computation. In Diffusion Transformers (DiTs), we can do this efficiently by exploiting the fact that activations change slowly across steps (see Part II for more detail on DiTs and their activation distributions).
 
 Our sparse attention delta algorithm (i) identifies important \[192, 1\] columns during a small set of dense steps, and then (ii) reuses these indices for a number of subsequent sparse steps. Within the dense attention kernel, we’d ideally be able to fuse a column sum directly after the q @ kT multiplication, but this would be a column sum over the unnormalized logits which results in uneven scales across rows. And even if we switched to fusing a column sum after the softmax in the dense kernel, this would result in each tile having different scales since [FlashAttention](https://arxiv.org/abs/2205.14135) computes the softmax incrementally over the tiles.
 
