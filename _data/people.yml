@@ -1,0 +1,15 @@
+phd_students:
+  - name: Hayden Prairie
+    website: https://hprairie.github.io/
+    photo: /images/people/hayden-prairie.jpg
+  - name: Austin Silveria
+    website: https://austinsilveria.github.io/
+    photo: /images/people/austin-silveria.png
+  - name: Jonah Yi
+    website: https://www.jonahyi.com/
+    photo: /images/people/jonah-yi.jpg
+
+faculty:
+  - name: Dan Fu
+    website: https://danfu.org/
+    photo: /images/people/dan-fu.jpeg
