@@ -1,0 +1,34 @@
+faculty:
+  - name: "Dan Fu"
+    image: "/images/dan.jpeg"
+    links:
+      google_scholar: "https://scholar.google.com/citations?user=Nut_70MAAAAJ&hl=en"
+      github: "https://github.com/DanFu09"
+      twitter: "https://x.com/realDanFu"
+      website: "https://danfu.org/"
+
+phd_students:
+  - name: "Hayden Prairie"
+    image: "/images/hayden.jpg"
+    links:
+      google_scholar: "https://scholar.google.com/citations?user=A1c25kAAAAAJ&hl=en"
+      github: "https://github.com/Hprairie"
+      twitter: "https://x.com/hayden_prairie"
+      website: "https://hprairie.github.io"
+  
+  - name: "Jonah Yi"
+    image: "/images/jonah.jpg"
+    links:
+      google_scholar: "https://scholar.google.com/citations?user=a4Lcw-QAAAAJ&hl=en"
+      github: "https://github.com/JonahYi"
+      twitter: ""
+      website: "https://www.jonahyi.com/"
+  
+  - name: "Austin Silvera"
+    image: "/images/austin.png"
+    links:
+      google_scholar: "https://scholar.google.com/citations?user=7nXCcNQAAAAJ&hl=en"
+      github: "https://github.com/austinsilveria"
+      twitter: "https://x.com/austinsilveria"
+      website: "https://austinsilveria.github.io/"
+
