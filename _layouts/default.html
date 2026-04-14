@@ -11,6 +11,43 @@
 
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
     <link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          macros: {
+            meanrecurrence: '{\\mu_{\\text{rec}}}',
+            meanbackward: '{\\mu_{\\text{bwd}}}',
+            prelude: '{\\mathcal{P}}',
+            recurrent: '{\\mathcal{R}}',
+            coda: '{\\mathcal{C}}',
+            dt: '{\\Delta}',
+            bm: ['{\\boldsymbol{#1}}', 1],
+            A: '{\\bm{A}}',
+            B: '{\\bm{B}}',
+            C: '{\\bm{C}}',
+            D: '{\\bm{D}}',
+            da: '{\\overline{\\bm{A}}}',
+            db: '{\\overline{\\bm{B}}}',
+            dA: '{\\overline{\\bm{A}}}',
+            dB: '{\\overline{\\bm{B}}}',
+            ddt: '{\\overline{\\bm{\\Delta}}}',
+            AB: '{(\\A, \\B)}',
+            ABC: '{(\\A, \\B, \\C)}',
+            dtAB: '{(\\dt, \\A, \\B)}',
+            dtABC: '{(\\dt, \\A, \\B, \\C)}',
+            dAB: '{(\\dA, \\dB)}',
+            R: '{\\mathbb{R}}',
+            vx: '{\\bm{x}}'
+          }
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
   </head>
