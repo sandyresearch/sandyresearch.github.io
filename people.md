@@ -5,10 +5,10 @@ show_title: false
 ---
 
 <div class="people-section">
-  {% if site.data.people.faculty.size > 0 %}
-  <h2>Faculty</h2>
+  {% if site.data.people.phd_students.size > 0 %}
+  <h2>PhD Students</h2>
   <div class="people-grid">
-    {% for person in site.data.people.faculty %}
+    {% for person in site.data.people.phd_students %}
     <div class="person-card">
       <div class="person-image">
         <img src="{{ person.image | relative_url }}" alt="{{ person.name }}">
@@ -25,10 +25,10 @@ show_title: false
   </div>
   {% endif %}
 
-  {% if site.data.people.phd_students.size > 0 %}
-  <h2>PhD Students</h2>
+  {% if site.data.people.faculty.size > 0 %}
+  <h2>Faculty</h2>
   <div class="people-grid">
-    {% for person in site.data.people.phd_students %}
+    {% for person in site.data.people.faculty %}
     <div class="person-card">
       <div class="person-image">
         <img src="{{ person.image | relative_url }}" alt="{{ person.name }}">
