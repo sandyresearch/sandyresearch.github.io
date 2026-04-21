@@ -84,3 +84,6 @@ exclude:
   - LICENSE
   - README.md
   - CNAME
+  - vendor
+  - .bundle
+  - node_modules
