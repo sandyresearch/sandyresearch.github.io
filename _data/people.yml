@@ -32,3 +32,11 @@ phd_students:
       twitter: "https://x.com/austinsilveria"
       website: "https://austinsilveria.github.io/"
 
+  - name: "Jinda Jia"
+    image: "/images/jinda.png"
+    links:
+      google_scholar: "https://scholar.google.com/citations?user=6lAxnDwAAAAJ&hl=en"
+      github: ""
+      twitter: "https://x.com/jia_jinda"
+      website: "https://jindajia.github.io/"
+
